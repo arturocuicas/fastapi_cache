@@ -3,7 +3,7 @@ version: "3.9"
 services:
   fastapi_service:
     build:
-      context: ./
+      context: ./app
       dockerfile: Dockerfile
     hostname: fastapi_service
     container_name: fastapi_service
@@ -12,16 +12,16 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - app/.env
     volumes:
-      - ./:/home/app
+      - ./app:/home/app
     networks:
       - my-net
 
-  redis-cache:
+  cache-redis:
     image: redis:alpine
-    hostname: redis-cache
-    container_name: redis-cache
+    hostname: cache-redis
+    container_name: cache-redis
     restart: on-failure
     ports:
       - '6379:6379'
