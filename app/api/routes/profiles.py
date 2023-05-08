@@ -1,5 +1,6 @@
-from typing import Optional
+from typing import Optional, Dict
 from uuid import UUID
+from random import shuffle
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 
@@ -9,6 +10,37 @@ from db.repositories.profiles import ProfileRepository
 from schemas.profiles import ProfileCreate, ProfilePatch, ProfileRead
 
 router = APIRouter()
+
+
+@router.get(
+    "/get_size",
+    status_code=status.HTTP_200_OK,
+    name="get_size",
+)
+async def get_size(
+    limit: int = Query(default=1000000, lte=1000000),
+    offset: int = Query(default=0),
+    repository: ProfileRepository = Depends(get_repository(ProfileRepository)),
+) -> Dict:
+    profiles_list = await repository.list(limit=limit, offset=offset)
+
+    return {"Size": len(profiles_list)}
+
+
+@router.get(
+    "/get_random_profile",
+    status_code=status.HTTP_200_OK,
+    name="get_random_profile",
+)
+async def get_random_profile(
+    limit: int = Query(default=1000000, lte=1000000),
+    offset: int = Query(default=0),
+    repository: ProfileRepository = Depends(get_repository(ProfileRepository)),
+) -> Dict:
+    profiles_list = await repository.list(limit=limit, offset=offset)
+    shuffle(profiles_list)
+
+    return {"Profile ID": f"{profiles_list[0].id}"}
 
 
 @router.post(
