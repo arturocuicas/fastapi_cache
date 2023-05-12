@@ -1,7 +1,7 @@
 import pickle
-from typing import Optional, Dict
-from uuid import UUID
 from random import shuffle
+from typing import Dict, Optional
+from uuid import UUID
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 
@@ -83,7 +83,6 @@ async def get_profile(
     redis_client: cache = Depends(cache),
     repository: ProfileRepository = Depends(get_repository(ProfileRepository)),
 ) -> ProfileRead:
-
     if (cached_profile := redis_client.get(f"profile_{profile_id}")) is not None:
         return pickle.loads(cached_profile)
 

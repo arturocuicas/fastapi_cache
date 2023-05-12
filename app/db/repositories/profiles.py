@@ -5,7 +5,6 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.errors import EntityDoesNotExist
-
 from db.tables.profiles import Profile
 from schemas.profiles import ProfileCreate, ProfilePatch, ProfileRead
 
@@ -15,10 +14,7 @@ class ProfileRepository:
         self.session = session
 
     async def _get_instance(self, profile_id: UUID):
-        statement = (
-            select(Profile)
-            .where(Profile.id == profile_id)
-        )
+        statement = select(Profile).where(Profile.id == profile_id)
         results = await self.session.exec(statement)
 
         return results.first()
@@ -32,11 +28,7 @@ class ProfileRepository:
         return ProfileRead(**db_profile.dict())
 
     async def list(self, limit: int = 10, offset: int = 0) -> list[ProfileRead]:
-        statement = (
-            select(Profile)
-            .offset(offset)
-            .limit(limit)
-        )
+        statement = select(Profile).offset(offset).limit(limit)
         results = await self.session.exec(statement)
 
         return [ProfileRead(**profile.dict()) for profile in results]

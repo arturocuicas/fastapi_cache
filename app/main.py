@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 
-from core.config import settings
 from api.router import router
-from db.sessions import create_db_and_tables, bulk_create_profiles
-
+from core.config import settings
+from db.sessions import bulk_create_profiles, create_db_and_tables
 
 app = FastAPI(
     title=settings.title,
@@ -11,7 +10,7 @@ app = FastAPI(
     description=settings.description,
     openapi_prefix=settings.openapi_prefix,
     docs_url=settings.docs_url,
-    openapi_url=settings.openapi_url
+    openapi_url=settings.openapi_url,
 )
 
 app.include_router(router, prefix=settings.api_prefix)
@@ -20,7 +19,6 @@ app.include_router(router, prefix=settings.api_prefix)
 @app.get("/")
 async def root():
     return {"Say": "Hello!"}
-
 
 
 @app.get("/create_tables")

@@ -7,7 +7,6 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from core.config import settings
 from db.tables.profiles import Profile
 
-
 engine = create_engine(
     settings.sync_database_url,
     echo=settings.db_echo_log,
