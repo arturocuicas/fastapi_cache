@@ -16,6 +16,7 @@ class GlobalConfig(BaseConfig):
     openapi_url: str = "/openapi.json"
     api_prefix: str = "/api"
     debug: bool = os.environ.get("DEBUG")
+
     postgres_user: str = os.environ.get("POSTGRES_USER")
     postgres_password: str = os.environ.get("POSTGRES_PASSWORD")
     postgres_server: str = os.environ.get("POSTGRES_SERVER")
@@ -23,6 +24,9 @@ class GlobalConfig(BaseConfig):
     postgres_db: str = os.environ.get("POSTGRES_DB")
     postgres_db_tests: str = os.environ.get("POSTGRES_DB_TESTS")
     db_echo_log: bool = True if os.environ.get("DEBUG") == "True" else False
+
+    redis_server: str = os.environ.get("REDIS_SERVER")
+    redis_port: int = int(os.environ.get("REDIS_PORT"))
 
     @property
     def sync_database_url(self) -> str:

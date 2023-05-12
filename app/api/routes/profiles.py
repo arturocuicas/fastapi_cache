@@ -1,9 +1,11 @@
+import pickle
 from typing import Optional, Dict
 from uuid import UUID
 from random import shuffle
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 
+from api.dependencies.redis import cache
 from api.dependencies.repositories import get_repository
 from db.errors import EntityDoesNotExist
 from db.repositories.profiles import ProfileRepository
@@ -78,16 +80,23 @@ async def get_profiles(
 )
 async def get_profile(
     profile_id: UUID,
+    redis_client: cache = Depends(cache),
     repository: ProfileRepository = Depends(get_repository(ProfileRepository)),
 ) -> ProfileRead:
+
+    if (cached_profile := redis_client.get(f"profile_{profile_id}")) is not None:
+        return pickle.loads(cached_profile)
+
     try:
-        await repository.get(profile_id=profile_id)
+        profile = await repository.get(profile_id=profile_id)
+        redis_client.set(f"profile_{profile_id}", pickle.dumps(profile))
+
+        return profile
+
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found!"
         )
-
-    return await repository.get(profile_id=profile_id)
 
 
 @router.delete(
@@ -97,16 +106,17 @@ async def get_profile(
 )
 async def delete_profile(
     profile_id: UUID,
+    redis_client: cache = Depends(cache),
     repository: ProfileRepository = Depends(get_repository(ProfileRepository)),
 ) -> None:
     try:
-        await repository.get(profile_id=profile_id)
+        await repository.delete(profile_id=profile_id)
+        redis_client.delete(f"profile_{profile_id}")
+
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found!"
         )
-
-    return await repository.delete(profile_id=profile_id)
 
 
 @router.put(
@@ -117,16 +127,19 @@ async def delete_profile(
 )
 async def update_profile(
     profile_id: UUID,
+    redis_client: cache = Depends(cache),
     profile_patch: ProfilePatch = Body(...),
     repository: ProfileRepository = Depends(get_repository(ProfileRepository)),
 ) -> ProfileRead:
     try:
-        await repository.get(profile_id=profile_id)
+        updated_profile = await repository.patch(
+            profile_id=profile_id, profile_patch=profile_patch
+        )
+        redis_client.delete(f"profile_{profile_id}")
+
+        return updated_profile
+
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found!"
         )
-
-    return await repository.patch(
-        profile_id=profile_id, profile_patch=profile_patch
-    )

@@ -74,5 +74,4 @@ class ProfileRepository:
             raise EntityDoesNotExist
 
         await self.session.delete(db_profile)
-
         await self.session.commit()
