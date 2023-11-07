@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from api.router import router
 from core.config import settings
+#from core.config import GlobalConfig as settings
 from db.sessions import bulk_create_profiles, create_db_and_tables
 
 app = FastAPI(
