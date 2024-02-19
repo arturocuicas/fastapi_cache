@@ -1,6 +1,7 @@
 from faker import Faker
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy_utils import create_database, database_exists
 from sqlmodel import SQLModel, create_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -24,6 +25,15 @@ async_session = sessionmaker(
 
 
 async def create_db_and_tables() -> None:
+    '''Verifica se o banco de dados existe,
+    caso não exista, cria-o'''
+    if not database_exists(engine.url):
+        create_database(engine.url)
+    SQLModel.metadata.drop_all(engine)
+    SQLModel.metadata.create_all(engine)
+
+
+async def reset_tables() -> None:
     SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
 
